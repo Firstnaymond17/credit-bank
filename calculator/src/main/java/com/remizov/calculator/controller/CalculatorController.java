@@ -4,7 +4,8 @@ import com.remizov.calculator.dto.CreditDto;
 import com.remizov.calculator.dto.LoanOfferDto;
 import com.remizov.calculator.dto.LoanStatementRequestDto;
 import com.remizov.calculator.dto.ScoringDataDto;
-import com.remizov.calculator.service.CalculatorService;
+import com.remizov.calculator.service.CreditService;
+import com.remizov.calculator.service.OfferService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -23,18 +24,19 @@ import java.util.List;
 @Tag(name = "Микросервис Калькулятор", description = "Методы для работы расчета условий кредита")
 public class CalculatorController {
 
-    private final CalculatorService calculatorService;
+    private final OfferService offerService;
+    private final CreditService creditService;
 
     @Operation(summary = "Отправить данные о клиенте", description = "Производится прескоринг входных данных, на выход клиент получает 4 предложения")
     @PostMapping("/offers")
     public List<LoanOfferDto> createOffers(@Valid @RequestBody LoanStatementRequestDto request) {
-        return calculatorService.createOffers(request);
+        return offerService.createOffers(request);
     }
 
     @Operation(summary = "Отправить данные о клиенте", description = "МС Калькулятор рассчитывает все данные по кредиту, на выход клиент получает условия кредита")
     @PostMapping("/calc")
     public CreditDto createCredit(@Valid @RequestBody ScoringDataDto scoringData) {
-        return calculatorService.createCredit(scoringData);
+        return creditService.createCredit(scoringData);
     }
 
 }

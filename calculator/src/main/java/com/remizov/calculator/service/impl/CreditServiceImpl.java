@@ -2,13 +2,13 @@ package com.remizov.calculator.service.impl;
 
 import com.remizov.calculator.dto.*;
 import com.remizov.calculator.exception.ScoringException;
-import com.remizov.calculator.service.CalculatorService;
-import jakarta.validation.Valid;
+import com.remizov.calculator.service.CreditService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
+import com.remizov.calculator.properties.ScoringProperties;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -16,69 +16,17 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
+
+import static com.remizov.calculator.service.impl.utils.MonthlyPaymentUtils.calculateMonthlyPayment;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class CalculatorServiceImpl implements CalculatorService {
+public class CreditServiceImpl implements CreditService {
     @Value("${base-rate}")
     private BigDecimal baseRate;
 
-    @Override
-    public List<LoanOfferDto> createOffers(LoanStatementRequestDto request) {
-        log.info("Получен запрос на создание предложений: amount={}, term={}", request.getAmount(), request.getTerm());
-
-        List<LoanOfferDto> offers = List.of(
-                buildOffer(request, false, false),
-                buildOffer(request, false, true),
-                buildOffer(request, true, false),
-                buildOffer(request, true, true));
-
-        log.info("Сформировано {} кредитных предложений", offers.size());
-        return offers;
-    }
-
-    private LoanOfferDto buildOffer(LoanStatementRequestDto request,
-                                    boolean isInsuranceEnabled,
-                                    boolean isSalaryClient) {
-        BigDecimal rate = baseRate;
-        if (isInsuranceEnabled) rate = rate.subtract(BigDecimal.valueOf(3));
-        if (isSalaryClient) rate = rate.subtract(BigDecimal.valueOf(1));
-
-        BigDecimal requestedAmount = request.getAmount();
-        BigDecimal totalAmount = requestedAmount;
-        if (isInsuranceEnabled) {
-            BigDecimal insuranceCost = requestedAmount.multiply(BigDecimal.valueOf(0.05));
-            totalAmount = requestedAmount.add(insuranceCost);
-        }
-
-        BigDecimal monthlyPayment = calculateMonthlyPayment(totalAmount, rate, request.getTerm());
-
-        log.debug("Оффер сформирован: insurance={}, salaryClient={}, rate={}, totalAmount={}, monthlyPayment={}",
-                isInsuranceEnabled, isSalaryClient, rate, totalAmount, monthlyPayment);
-
-        return LoanOfferDto.builder()
-                .statementId(UUID.randomUUID())
-                .requestedAmount(requestedAmount)
-                .totalAmount(totalAmount)
-                .term(request.getTerm())
-                .monthlyPayment(monthlyPayment)
-                .rate(rate)
-                .isInsuranceEnabled(isInsuranceEnabled)
-                .isSalaryClient(isSalaryClient)
-                .build();
-    }
-
-    private BigDecimal calculateMonthlyPayment(BigDecimal totalAmount, BigDecimal rate, Integer term) {
-        BigDecimal monthlyRate = rate.divide(BigDecimal.valueOf(1200), 10, RoundingMode.HALF_UP);
-        BigDecimal pow = monthlyRate.add(BigDecimal.ONE).pow(term);
-        BigDecimal numerator = monthlyRate.multiply(pow);
-        BigDecimal denominator = pow.subtract(BigDecimal.ONE);
-        return totalAmount.multiply(numerator.divide(denominator, 10, RoundingMode.HALF_UP))
-                .setScale(2, RoundingMode.HALF_UP);
-    }
-
+    private final ScoringProperties scoringProperties;
 
     @Override
     public CreditDto createCredit(ScoringDataDto request) {
@@ -114,8 +62,8 @@ public class CalculatorServiceImpl implements CalculatorService {
     }
 
     private BigDecimal scoring(ScoringDataDto request, BigDecimal rate) {
-        if (request.getIsInsuranceEnabled()) rate = rate.subtract(BigDecimal.valueOf(3));
-        if (request.getIsSalaryClient()) rate = rate.subtract(BigDecimal.ONE);
+        if (request.getIsInsuranceEnabled()) rate = rate.subtract(BigDecimal.valueOf(scoringProperties.getInsuranceRateDiscount()));
+        if (request.getIsSalaryClient()) rate = rate.subtract(BigDecimal.valueOf(scoringProperties.getSalaryClientRateDiscount()));
 
         EmploymentDto emp = request.getEmployment();
 
@@ -124,46 +72,36 @@ public class CalculatorServiceImpl implements CalculatorService {
                 log.warn("Скоринг не пройден: безработный");
                 throw new ScoringException("Отказ: безработный");
             }
-            case SELF_EMPLOYED -> rate = rate.add(BigDecimal.valueOf(2));
-            case BUSINESS_OWNER -> rate = rate.add(BigDecimal.ONE);
+            case SELF_EMPLOYED -> rate = rate.add(BigDecimal.valueOf(scoringProperties.getSelfEmployedRateIncrease()));
+            case BUSINESS_OWNER -> rate = rate.add(BigDecimal.valueOf(scoringProperties.getBusinessOwnerRateIncrease()));
         }
 
         switch (emp.getPosition()) {
-            case MID_MANAGER -> rate = rate.subtract(BigDecimal.valueOf(2));
-            case TOP_MANAGER -> rate = rate.subtract(BigDecimal.valueOf(3));
+            case MID_MANAGER -> rate = rate.subtract(BigDecimal.valueOf(scoringProperties.getMidManagerRateDiscount()));
+            case TOP_MANAGER -> rate = rate.subtract(BigDecimal.valueOf(scoringProperties.getTopManagerRateDiscount()));
         }
 
-        if (request.getAmount().compareTo(emp.getSalary().multiply(BigDecimal.valueOf(24))) > 0) {
+        if (request.getAmount().compareTo(emp.getSalary().multiply(BigDecimal.valueOf(scoringProperties.getMaxSalaryMultiplier()))) > 0) {
             log.warn("Скоринг не пройден: сумма превышает 24 зарплаты");
             throw new ScoringException("Отказ: сумма займа превышает 24 зарплаты");
         }
 
         switch (request.getMaritalStatus()) {
-            case MARRIED -> rate = rate.subtract(BigDecimal.valueOf(3));
-            case DIVORCED -> rate = rate.add(BigDecimal.ONE);
+            case MARRIED -> rate = rate.subtract(BigDecimal.valueOf(scoringProperties.getMarriedRateDiscount()));
+            case DIVORCED -> rate = rate.add(BigDecimal.valueOf(scoringProperties.getDivorcedRateIncrease()));
         }
 
         int age = Period.between(request.getBirthdate(), LocalDate.now()).getYears();
-        if (age < 20 || age > 65) {
+        if (age < scoringProperties.getMinPossibleAge() || age > scoringProperties.getMaxPossibleAge()) {
             log.warn("Скоринг не пройден: возраст={}", age);
             throw new ScoringException("Отказ: возраст вне диапазона");
         }
 
-        switch (request.getGender()) {
-            case FEMALE -> {
-                if (age >= 32 && age <= 60) rate = rate.subtract(BigDecimal.valueOf(3));
-            }
-            case MALE -> {
-                if (age >= 30 && age <= 55) rate = rate.subtract(BigDecimal.valueOf(3));
-            }
-            case NON_BINARY -> rate = rate.add(BigDecimal.valueOf(7));
-        }
-
-        if (emp.getWorkExperienceTotal() < 18) {
+        if (emp.getWorkExperienceTotal() < scoringProperties.getMinWorkExperienceTotal()) {
             log.warn("Скоринг не пройден: общий стаж={}", emp.getWorkExperienceTotal());
             throw new ScoringException("Отказ: общий стаж меньше 18 месяцев");
         }
-        if (emp.getWorkExperienceCurrent() < 3) {
+        if (emp.getWorkExperienceCurrent() < scoringProperties.getMinWorkExperienceCurrent()) {
             log.warn("Скоринг не пройден: текущий стаж={}", emp.getWorkExperienceCurrent());
             throw new ScoringException("Отказ: текущий стаж меньше 3 месяцев");
         }

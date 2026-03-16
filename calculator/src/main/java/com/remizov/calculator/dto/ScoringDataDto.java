@@ -3,7 +3,6 @@ package com.remizov.calculator.dto;
 import com.remizov.calculator.dto.validation.annotation.Adulthood;
 import com.remizov.calculator.dto.validation.annotation.Name;
 import jakarta.validation.constraints.*;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
