@@ -7,7 +7,7 @@ server:
 logging:
   level:
     root: INFO
-    com.example: DEBUG
+    com.remizov: DEBUG
 
 base-rate: 25
 

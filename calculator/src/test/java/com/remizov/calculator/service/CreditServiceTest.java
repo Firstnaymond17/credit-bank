@@ -19,9 +19,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.stream.Stream;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.lenient;
 
 @ExtendWith(MockitoExtension.class)
@@ -56,37 +54,12 @@ public class CreditServiceTest {
         lenient().when(scoringProperties.getMinWorkExperienceCurrent()).thenReturn(3);
     }
 
-    private static ScoringDataDto scoringRequest() {
-        EmploymentDto empDto = new EmploymentDto();
-        empDto.setEmploymentStatus(EmploymentDto.EmploymentStatus.EMPLOYED);
-        empDto.setPosition(EmploymentDto.Position.MID_MANAGER);
-        empDto.setSalary(BigDecimal.valueOf(100_000));
-        empDto.setWorkExperienceTotal(24);
-        empDto.setWorkExperienceCurrent(6);
-
-        ScoringDataDto dto = new ScoringDataDto();
-        dto.setAmount(BigDecimal.valueOf(100_000));
-        dto.setTerm(12);
-        dto.setFirstName("Ivan");
-        dto.setLastName("Ivanov");
-        dto.setMiddleName("Ivanovich");
-        dto.setGender(ScoringDataDto.Gender.MALE);
-        dto.setBirthdate(LocalDate.of(1990, 1, 1));
-        dto.setMaritalStatus(ScoringDataDto.MaritalStatus.MARRIED);
-        dto.setIsInsuranceEnabled(false);
-        dto.setIsSalaryClient(false);
-        dto.setPassportSeries("6325");
-        dto.setPassportNumber("123456");
-        dto.setEmployment(empDto);
-        return dto;
-    }
-
     @Test
     @DisplayName("createCredit — ставка = 20 (25 - 2 MID_MANAGER - 3 MARRIED)")
     void createCredit_rateCalculatedCorrectly() {
         CreditDto credit = creditService.createCredit(scoringRequest());
 
-        assertThat(credit.getRate()).isEqualByComparingTo(BigDecimal.valueOf(20));
+        assertEquals(0, credit.getRate().compareTo(BigDecimal.valueOf(20)));
     }
 
     @Test
@@ -94,26 +67,27 @@ public class CreditServiceTest {
     void createCredit_scheduleHasCorrectSize() {
         CreditDto credit = creditService.createCredit(scoringRequest());
 
-        assertThat(credit.getPaymentSchedule()).hasSize(12);
+        assertEquals(12, credit.getPaymentSchedule().size());
     }
 
     @ParameterizedTest(name = "[{index}] {1}")
     @MethodSource("scoringExceptionCases")
     @DisplayName("createCredit — ScoringException при разных условиях скоринга")
     void createCredit_scoringException_parameterized(ScoringDataDto request, String expectedMessage) {
-        assertThatThrownBy(() -> creditService.createCredit(request))
-                .isInstanceOf(ScoringException.class)
-                .hasMessageContaining(expectedMessage);
+        ScoringException exception = assertThrows(ScoringException.class,
+                () -> creditService.createCredit(request));
+
+        assertEquals(expectedMessage, exception.getMessage());
     }
 
     static Stream<Arguments> scoringExceptionCases() {
         return Stream.of(
-                Arguments.of(withUnemployed(), "безработный"),
-                Arguments.of(withAmountExceedsSalary(), "24 зарплаты"),
-                Arguments.of(withAgeTooYoung(), "возраст"),
-                Arguments.of(withAgeTooOld(), "возраст"),
-                Arguments.of(withLowTotalExperience(), "общий стаж"),
-                Arguments.of(withLowCurrentExperience(), "текущий стаж")
+                Arguments.of(withUnemployed(), "Отказ: безработный"),
+                Arguments.of(withAmountExceedsSalary(), "Отказ: сумма займа превышает 24 зарплаты"),
+                Arguments.of(withAgeTooYoung(), "Отказ: возраст вне диапазона"),
+                Arguments.of(withAgeTooOld(), "Отказ: возраст вне диапазона"),
+                Arguments.of(withLowTotalExperience(), "Отказ: общий стаж меньше 18 месяцев"),
+                Arguments.of(withLowCurrentExperience(), "Отказ: текущий стаж меньше 3 месяцев")
         );
     }
 
@@ -152,4 +126,30 @@ public class CreditServiceTest {
         dto.getEmployment().setWorkExperienceCurrent(2);
         return dto;
     }
+
+    private static ScoringDataDto scoringRequest() {
+        EmploymentDto empDto = new EmploymentDto();
+        empDto.setEmploymentStatus(EmploymentDto.EmploymentStatus.EMPLOYED);
+        empDto.setPosition(EmploymentDto.Position.MID_MANAGER);
+        empDto.setSalary(BigDecimal.valueOf(100_000));
+        empDto.setWorkExperienceTotal(24);
+        empDto.setWorkExperienceCurrent(6);
+
+        ScoringDataDto dto = new ScoringDataDto();
+        dto.setAmount(BigDecimal.valueOf(100_000));
+        dto.setTerm(12);
+        dto.setFirstName("Ivan");
+        dto.setLastName("Ivanov");
+        dto.setMiddleName("Ivanovich");
+        dto.setGender(ScoringDataDto.Gender.MALE);
+        dto.setBirthdate(LocalDate.of(1990, 1, 1));
+        dto.setMaritalStatus(ScoringDataDto.MaritalStatus.MARRIED);
+        dto.setIsInsuranceEnabled(false);
+        dto.setIsSalaryClient(false);
+        dto.setPassportSeries("6325");
+        dto.setPassportNumber("123456");
+        dto.setEmployment(empDto);
+        return dto;
+    }
+
 }

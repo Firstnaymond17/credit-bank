@@ -1,25 +1,25 @@
 package com.remizov.calculator.service.impl;
 
 import com.remizov.calculator.dto.*;
+import com.remizov.calculator.properties.ScoringProperties;
 import com.remizov.calculator.service.OfferService;
+import com.remizov.calculator.utils.MonthlyPaymentUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.List;
 import java.util.UUID;
 
-import static com.remizov.calculator.service.impl.utils.MonthlyPaymentUtils.calculateMonthlyPayment;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class OfferServiceImpl implements OfferService {
-    @Value("${base-rate}")
-    private BigDecimal baseRate;
+
+    private final ScoringProperties scoringProperties;
 
     @Override
     public List<LoanOfferDto> createOffers(LoanStatementRequestDto request) {
@@ -38,7 +38,7 @@ public class OfferServiceImpl implements OfferService {
     private LoanOfferDto buildOffer(LoanStatementRequestDto request,
                                     boolean isInsuranceEnabled,
                                     boolean isSalaryClient) {
-        BigDecimal rate = baseRate;
+        BigDecimal rate = scoringProperties.getBaseRate();
         if (isInsuranceEnabled) rate = rate.subtract(BigDecimal.valueOf(3));
         if (isSalaryClient) rate = rate.subtract(BigDecimal.valueOf(1));
 
@@ -49,7 +49,7 @@ public class OfferServiceImpl implements OfferService {
             totalAmount = requestedAmount.add(insuranceCost);
         }
 
-        BigDecimal monthlyPayment = calculateMonthlyPayment(totalAmount, rate, request.getTerm());
+        BigDecimal monthlyPayment = MonthlyPaymentUtils.calculateMonthlyPayment(totalAmount, rate, request.getTerm());
 
         log.debug("Оффер сформирован: insurance={}, salaryClient={}, rate={}, totalAmount={}, monthlyPayment={}",
                 isInsuranceEnabled, isSalaryClient, rate, totalAmount, monthlyPayment);

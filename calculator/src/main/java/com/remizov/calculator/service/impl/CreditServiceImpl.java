@@ -3,10 +3,10 @@ package com.remizov.calculator.service.impl;
 import com.remizov.calculator.dto.*;
 import com.remizov.calculator.exception.ScoringException;
 import com.remizov.calculator.service.CreditService;
+import com.remizov.calculator.utils.MonthlyPaymentUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Service;
 import com.remizov.calculator.properties.ScoringProperties;
 
@@ -17,14 +17,11 @@ import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.remizov.calculator.service.impl.utils.MonthlyPaymentUtils.calculateMonthlyPayment;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class CreditServiceImpl implements CreditService {
-    @Value("${base-rate}")
-    private BigDecimal baseRate;
 
     private final ScoringProperties scoringProperties;
 
@@ -32,11 +29,11 @@ public class CreditServiceImpl implements CreditService {
     public CreditDto createCredit(ScoringDataDto request) {
         log.info("Получен запрос на расчёт кредита: amount={}, term={}", request.getAmount(), request.getTerm());
 
-        BigDecimal rate = baseRate;
+        BigDecimal rate = scoringProperties.getBaseRate();
         rate = scoring(request, rate);
         log.debug("Итоговая ставка после скоринга: rate={}", rate);
 
-        BigDecimal monthlyPayment = calculateMonthlyPayment(request.getAmount(), rate, request.getTerm());
+        BigDecimal monthlyPayment = MonthlyPaymentUtils.calculateMonthlyPayment(request.getAmount(), rate, request.getTerm());
         log.debug("Ежемесячный платёж: monthlyPayment={}", monthlyPayment);
 
         BigDecimal psk = monthlyPayment.multiply(BigDecimal.valueOf(request.getTerm()));
