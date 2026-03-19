@@ -1,21 +1,16 @@
 package com.remizov.calculator.properties;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 
 @ConfigurationProperties(prefix = "scoring")
 @Getter
 @Setter
 public class ScoringProperties {
 
-    private final BigDecimal baseRate = BigDecimal.valueOf(25);
-
+    private double baseRate = 25;
     private int minPossibleAge;
     private int maxPossibleAge;
     private int insuranceRateDiscount;

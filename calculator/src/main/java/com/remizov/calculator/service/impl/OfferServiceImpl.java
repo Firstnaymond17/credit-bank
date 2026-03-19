@@ -6,7 +6,6 @@ import com.remizov.calculator.service.OfferService;
 import com.remizov.calculator.utils.MonthlyPaymentUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -20,6 +19,7 @@ import java.util.UUID;
 public class OfferServiceImpl implements OfferService {
 
     private final ScoringProperties scoringProperties;
+
 
     @Override
     public List<LoanOfferDto> createOffers(LoanStatementRequestDto request) {
@@ -38,7 +38,7 @@ public class OfferServiceImpl implements OfferService {
     private LoanOfferDto buildOffer(LoanStatementRequestDto request,
                                     boolean isInsuranceEnabled,
                                     boolean isSalaryClient) {
-        BigDecimal rate = scoringProperties.getBaseRate();
+        BigDecimal rate = BigDecimal.valueOf(scoringProperties.getBaseRate());
         if (isInsuranceEnabled) rate = rate.subtract(BigDecimal.valueOf(3));
         if (isSalaryClient) rate = rate.subtract(BigDecimal.valueOf(1));
 

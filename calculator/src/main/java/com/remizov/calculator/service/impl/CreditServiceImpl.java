@@ -6,7 +6,6 @@ import com.remizov.calculator.service.CreditService;
 import com.remizov.calculator.utils.MonthlyPaymentUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import com.remizov.calculator.properties.ScoringProperties;
 
@@ -29,7 +28,7 @@ public class CreditServiceImpl implements CreditService {
     public CreditDto createCredit(ScoringDataDto request) {
         log.info("Получен запрос на расчёт кредита: amount={}, term={}", request.getAmount(), request.getTerm());
 
-        BigDecimal rate = scoringProperties.getBaseRate();
+        BigDecimal rate = BigDecimal.valueOf(scoringProperties.getBaseRate());
         rate = scoring(request, rate);
         log.debug("Итоговая ставка после скоринга: rate={}", rate);
 

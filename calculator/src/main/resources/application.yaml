@@ -9,9 +9,9 @@ logging:
     root: INFO
     com.remizov: DEBUG
 
-base-rate: 25
 
 scoring:
+  base-rate: 25
   min-possible-age: 20
   max-possible-age: 65
   insurance-rate-discount: 3

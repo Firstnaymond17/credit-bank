@@ -2,7 +2,6 @@ package com.remizov.calculator.dto;
 
 import lombok.Builder;
 import lombok.Data;
-import org.apache.tomcat.util.json.JSONParser;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

@@ -14,7 +14,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -33,8 +32,7 @@ public class CreditServiceTest {
 
     @BeforeEach
     void setUp() {
-        ReflectionTestUtils.setField(creditService, "baseRate", BigDecimal.valueOf(25));
-
+        lenient().when(scoringProperties.getBaseRate()).thenReturn(25.0);
         lenient().when(scoringProperties.getInsuranceRateDiscount()).thenReturn(3);
         lenient().when(scoringProperties.getSalaryClientRateDiscount()).thenReturn(1);
         lenient().when(scoringProperties.getSelfEmployedRateIncrease()).thenReturn(2);
