@@ -1,0 +1,4 @@
+com\remizov\deal\service\OfferServiceTest.class
+com\remizov\deal\service\CalculateServiceTest.class
+com\remizov\deal\controller\DealControllerTest.class
+com\remizov\deal\service\StatementServiceTest.class
