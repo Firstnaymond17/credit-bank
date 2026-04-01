@@ -1,0 +1,29 @@
+package com.remizov.deal.utils;
+
+import com.remizov.deal.dto.StatementStatusHistoryDto;
+import com.remizov.deal.entity.Statement;
+import com.remizov.deal.enums.ApplicationStatus;
+import com.remizov.deal.enums.ChangeType;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+public class StatementUtils {
+
+    private StatementUtils() {}
+
+    public static void updateStatementStatus(Statement statement, ApplicationStatus status) {
+        StatementStatusHistoryDto historyEntry = new StatementStatusHistoryDto();
+        historyEntry.setStatus(status);
+        historyEntry.setTime(LocalDateTime.now());
+        historyEntry.setChangeType(ChangeType.AUTOMATIC);
+
+        List<Object> history = statement.getStatusHistory();
+        if (history == null) history = new ArrayList<>();
+        history.add(historyEntry);
+
+        statement.setStatus(status);
+        statement.setStatusHistory(history);
+    }
+}
