@@ -1,11 +1,7 @@
 package com.remizov.deal.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.remizov.deal.dto.*;
-import com.remizov.deal.entity.Client;
 import com.remizov.deal.entity.Credit;
-import com.remizov.deal.entity.Passport;
 import com.remizov.deal.entity.Statement;
 import com.remizov.deal.enums.ApplicationStatus;
 import com.remizov.deal.enums.CreditStatus;
@@ -14,6 +10,9 @@ import com.remizov.deal.mapper.ScoringDataMapper;
 import com.remizov.deal.repository.CreditRepository;
 import com.remizov.deal.repository.StatementRepository;
 import com.remizov.deal.service.impl.CalculateServiceImpl;
+import com.remizov.deal.utils.JsonTestDataUtils;
+import com.remizov.deal.utils.RestClientMockUtils;
+import com.remizov.deal.utils.TestDataUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,13 +21,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.util.ResourceUtils;
 import org.springframework.web.client.RestClient;
 
-import java.io.File;
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -72,14 +67,8 @@ public class CalculateServiceTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-
-        File requestFile = ResourceUtils.getFile("classpath:test-data/finish-registration-request.json");
-        request = objectMapper.readValue(requestFile, FinishRegistrationRequestDto.class);
-
-        File creditFile = ResourceUtils.getFile("classpath:test-data/credit-dto.json");
-        creditDto = objectMapper.readValue(creditFile, CreditDto.class);
+        request = JsonTestDataUtils.read("test-data/finish-registration-request.json", FinishRegistrationRequestDto.class);
+        creditDto = JsonTestDataUtils.read("test-data/credit-dto.json", CreditDto.class);
 
         lenient().when(scoringDataMapper.toScoringData(any(), any(), any()))
                 .thenReturn(new ScoringDataDto());
@@ -96,32 +85,8 @@ public class CalculateServiceTest {
     }
 
     @Test
-    @DisplayName("calculate — кредит создаётся и сохраняется в БД")
-    void calculate_creditIsSaved() {
-        UUID statementId = UUID.randomUUID();
-        mockRestClient(creditDto);
-        when(statementRepository.findById(statementId)).thenReturn(Optional.of(statement(statementId)));
-
-        calculateService.calculate(statementId.toString(), request);
-
-        verify(creditRepository).save(any(Credit.class));
-    }
-
-    @Test
-    @DisplayName("calculate — заявка обновляется и сохраняется в БД")
-    void calculate_statementIsSaved() {
-        UUID statementId = UUID.randomUUID();
-        mockRestClient(creditDto);
-        when(statementRepository.findById(statementId)).thenReturn(Optional.of(statement(statementId)));
-
-        calculateService.calculate(statementId.toString(), request);
-
-        verify(statementRepository).save(any(Statement.class));
-    }
-
-    @Test
-    @DisplayName("calculate — статус заявки обновляется на CC_APPROVED")
-    void calculate_statementStatusUpdatedToCcApproved() {
+    @DisplayName("calculate — сохраняет кредит, заявку и обновляет статус")
+    void calculate_savesAll() {
         UUID statementId = UUID.randomUUID();
         Statement statement = statement(statementId);
         mockRestClient(creditDto);
@@ -129,6 +94,8 @@ public class CalculateServiceTest {
 
         calculateService.calculate(statementId.toString(), request);
 
+        verify(creditRepository).save(any(Credit.class));
+        verify(statementRepository).save(statement);
         assertEquals(ApplicationStatus.CC_APPROVED, statement.getStatus());
     }
 
@@ -183,36 +150,10 @@ public class CalculateServiceTest {
     }
 
     private void mockRestClient(CreditDto response) {
-        when(restClient.post()).thenReturn(requestBodyUriSpec);
-        when(requestBodyUriSpec.uri(anyString())).thenReturn(requestBodySpec);
-        when(requestBodySpec.body(any(Object.class))).thenReturn(requestBodySpec);
-        when(requestBodySpec.retrieve()).thenReturn(responseSpec);
-        when(responseSpec.body(CreditDto.class)).thenReturn(response);
+        RestClientMockUtils.mockRestClient(restClient, requestBodyUriSpec, requestBodySpec, responseSpec, creditDto);
     }
 
     private static Statement statement(UUID id) {
-        Passport passport = new Passport();
-        passport.setSeries("1234");
-        passport.setNumber("123456");
-
-        Client client = new Client();
-        client.setFirstName("Ivan");
-        client.setLastName("Ivanov");
-        client.setBirthDate(LocalDate.of(1990, 1, 1));
-        client.setPassport(passport);
-
-        Statement statement = new Statement();
-        statement.setId(id);
-        statement.setClient(client);
-        statement.setStatusHistory(new ArrayList<>());
-        statement.setAppliedOffer(LoanOfferDto.builder()
-                .statementId(id)
-                .requestedAmount(BigDecimal.valueOf(100000))
-                .term(12)
-                .rate(BigDecimal.valueOf(21))
-                .isInsuranceEnabled(false)
-                .isSalaryClient(false)
-                .build());
-        return statement;
+        return TestDataUtils.createStatement(id);
     }
 }
