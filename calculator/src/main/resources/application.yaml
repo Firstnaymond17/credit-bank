@@ -1,3 +1,31 @@
 spring:
   application:
     name: calculator
+
+server:
+  port: 8080
+logging:
+  level:
+    root: INFO
+    com.remizov: DEBUG
+
+
+scoring:
+  base-rate: 25
+  min-possible-age: 20
+  max-possible-age: 65
+  insurance-rate-discount: 3
+  salary-client-rate-discount: 1
+  self-employed-rate-increase: 2
+  business-owner-rate-increase: 1
+  mid-manager-rate-discount: 2
+  top-manager-rate-discount: 3
+  married-rate-discount: 3
+  divorced-rate-increase: 1
+  max-salary-multiplier: 24
+  female-min-age: 32
+  female-max-age: 60
+  male-min-age: 30
+  male-max-age: 55
+  min-work-experience-total: 18
+  min-work-experience-current: 3
