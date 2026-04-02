@@ -4,14 +4,14 @@ import com.remizov.deal.dto.StatementStatusHistoryDto;
 import com.remizov.deal.entity.Statement;
 import com.remizov.deal.enums.ApplicationStatus;
 import com.remizov.deal.enums.ChangeType;
+import lombok.experimental.UtilityClass;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@UtilityClass
 public class StatementUtils {
-
-    private StatementUtils() {}
 
     public static void updateStatementStatus(Statement statement, ApplicationStatus status) {
         StatementStatusHistoryDto historyEntry = new StatementStatusHistoryDto();
