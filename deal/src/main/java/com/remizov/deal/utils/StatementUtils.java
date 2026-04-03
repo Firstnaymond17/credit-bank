@@ -2,8 +2,8 @@ package com.remizov.deal.utils;
 
 import com.remizov.deal.dto.StatementStatusHistoryDto;
 import com.remizov.deal.entity.Statement;
-import com.remizov.deal.enums.ApplicationStatus;
-import com.remizov.deal.enums.ChangeType;
+import com.remizov.deal.entity.enums.ApplicationStatus;
+import com.remizov.deal.entity.enums.ChangeType;
 import lombok.experimental.UtilityClass;
 
 import java.time.LocalDateTime;
@@ -13,7 +13,7 @@ import java.util.List;
 @UtilityClass
 public class StatementUtils {
 
-    public static void updateStatementStatus(Statement statement, ApplicationStatus status) {
+    public void updateStatementStatus(Statement statement, ApplicationStatus status) {
         StatementStatusHistoryDto historyEntry = new StatementStatusHistoryDto();
         historyEntry.setStatus(status);
         historyEntry.setTime(LocalDateTime.now());

@@ -1,6 +1,6 @@
 package com.remizov.deal.entity;
 
-import com.remizov.deal.enums.ApplicationStatus;
+import com.remizov.deal.entity.enums.ApplicationStatus;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.*;
 import lombok.Data;

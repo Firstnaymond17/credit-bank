@@ -1,7 +1,7 @@
 package com.remizov.deal.dto;
 
-import com.remizov.deal.enums.EmploymentPosition;
-import com.remizov.deal.enums.EmploymentStatus;
+import com.remizov.deal.entity.enums.EmploymentPosition;
+import com.remizov.deal.entity.enums.EmploymentStatus;
 import lombok.Data;
 
 import java.math.BigDecimal;

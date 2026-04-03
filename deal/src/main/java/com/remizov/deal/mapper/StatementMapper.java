@@ -2,7 +2,7 @@ package com.remizov.deal.mapper;
 
 import com.remizov.deal.entity.Client;
 import com.remizov.deal.entity.Statement;
-import com.remizov.deal.enums.ApplicationStatus;
+import com.remizov.deal.entity.enums.ApplicationStatus;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

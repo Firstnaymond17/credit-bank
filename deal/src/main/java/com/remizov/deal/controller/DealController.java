@@ -35,7 +35,6 @@ public class DealController {
     @PostMapping("/statement")
     public ResponseEntity<List<LoanOfferDto>> statement(@Valid @RequestBody LoanStatementRequestDto request) {
         List<LoanOfferDto> offers = statementService.statement(request);
-        log.info("POST /deal/statement: возвращено {} офферов", offers != null ? offers.size() : 0);
         return ResponseEntity.ok(offers);
     }
 
@@ -46,7 +45,6 @@ public class DealController {
     @PostMapping("/offer/select")
     public ResponseEntity<Void> selectOffer(@RequestBody LoanOfferDto request) {
         offerService.selectOffer(request);
-        log.info("POST /deal/offer/select: оффер выбран успешно, statementId={}", request.getStatementId());
         return ResponseEntity.ok().build();
     }
 
@@ -59,7 +57,6 @@ public class DealController {
             @Parameter(description = "ID заявки") @PathVariable String statementId,
             @RequestBody FinishRegistrationRequestDto request) {
         calculateService.calculate(statementId, request);
-        log.info("POST /deal/calculate/{}: расчёт завершён успешно", statementId);
         return ResponseEntity.ok().build();
     }
 }

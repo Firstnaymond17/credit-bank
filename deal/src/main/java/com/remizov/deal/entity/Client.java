@@ -1,10 +1,12 @@
 package com.remizov.deal.entity;
 
-import com.remizov.deal.enums.Gender;
-import com.remizov.deal.enums.MaritalStatus;
+import com.remizov.deal.entity.enums.Gender;
+import com.remizov.deal.entity.enums.MaritalStatus;
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Type;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -46,12 +48,12 @@ public class Client {
     @Column(name = "dependent_amount")
     private Integer dependentAmount;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "passport_id")
+    @Type(JsonBinaryType.class)
+    @Column(name = "passport", columnDefinition = "jsonb")
     private Passport passport;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "employment_id")
+    @Type(JsonBinaryType.class)
+    @Column(name = "employment", columnDefinition = "jsonb")
     private Employment employment;
 
     @Column(name = "account_number")

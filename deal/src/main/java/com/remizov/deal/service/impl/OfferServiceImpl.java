@@ -2,7 +2,7 @@ package com.remizov.deal.service.impl;
 
 import com.remizov.deal.dto.LoanOfferDto;
 import com.remizov.deal.entity.Statement;
-import com.remizov.deal.enums.ApplicationStatus;
+import com.remizov.deal.entity.enums.ApplicationStatus;
 import com.remizov.deal.repository.StatementRepository;
 import com.remizov.deal.service.OfferService;
 import com.remizov.deal.utils.StatementUtils;

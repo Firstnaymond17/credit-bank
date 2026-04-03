@@ -2,14 +2,14 @@ package com.remizov.deal.mapper;
 
 import com.remizov.deal.dto.CreditDto;
 import com.remizov.deal.entity.Credit;
-import com.remizov.deal.enums.CreditStatus;
+import com.remizov.deal.entity.enums.CreditStatus;
 import java.util.ArrayList;
 import javax.annotation.processing.Generated;
 import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-04-02T20:39:07+0400",
+    date = "2026-04-03T15:04:10+0400",
     comments = "version: 1.6.3, compiler: javac, environment: Java 21.0.10 (Microsoft)"
 )
 @Component

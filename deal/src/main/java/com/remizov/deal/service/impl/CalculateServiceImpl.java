@@ -5,12 +5,13 @@ import com.remizov.deal.dto.*;
 import com.remizov.deal.entity.Client;
 import com.remizov.deal.entity.Credit;
 import com.remizov.deal.entity.Statement;
-import com.remizov.deal.enums.ApplicationStatus;
+import com.remizov.deal.entity.enums.ApplicationStatus;
 import com.remizov.deal.mapper.CreditMapper;
 import com.remizov.deal.mapper.ScoringDataMapper;
 import com.remizov.deal.repository.CreditRepository;
 import com.remizov.deal.repository.StatementRepository;
 import com.remizov.deal.service.CalculateService;
+import com.remizov.deal.service.impl.client.CalculatorClient;
 import com.remizov.deal.utils.StatementUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,11 +25,11 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class CalculateServiceImpl implements CalculateService {
 
+    private final CalculatorClient calculatorClient;
     private final ScoringDataMapper scoringDataMapper;
     private final CreditMapper creditMapper;
     private final StatementRepository statementRepository;
     private final CreditRepository creditRepository;
-    private final RestClient restClient;
 
     @Override
     public void calculate(String statementId, FinishRegistrationRequestDto request) {
@@ -49,11 +50,7 @@ public class CalculateServiceImpl implements CalculateService {
         ScoringDataDto scoringData = createScoringData(client, appliedOffer, request);
         log.info("Скоринг данные сформированы, отправка в калькулятор на /calculator/calc");
 
-        CreditDto creditDto = restClient.post()
-                .uri("/calculator/calc")
-                .body(scoringData)
-                .retrieve()
-                .body(CreditDto.class);
+        CreditDto creditDto = calculatorClient.calculateCredit(scoringData);
 
         if (creditDto == null) {
             log.error("Калькулятор не вернул данные по кредиту: statementId={}", statementId);

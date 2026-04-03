@@ -2,7 +2,7 @@ package com.remizov.deal.mapper;
 
 import com.remizov.deal.dto.CreditDto;
 import com.remizov.deal.entity.Credit;
-import com.remizov.deal.enums.CreditStatus;
+import com.remizov.deal.entity.enums.CreditStatus;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

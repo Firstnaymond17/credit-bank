@@ -2,7 +2,7 @@ package com.remizov.deal.service;
 
 import com.remizov.deal.dto.LoanOfferDto;
 import com.remizov.deal.entity.Statement;
-import com.remizov.deal.enums.ApplicationStatus;
+import com.remizov.deal.entity.enums.ApplicationStatus;
 import com.remizov.deal.repository.StatementRepository;
 import com.remizov.deal.service.impl.OfferServiceImpl;
 import org.jeasy.random.EasyRandom;
@@ -32,8 +32,8 @@ public class OfferServiceTest {
     private static final EasyRandom easyRandom = new EasyRandom();
 
     @Test
-    @DisplayName("selectOffer — статус заявки обновляется на APPROVED")
-    void selectOffer_updatesStatementStatusToApproved() {
+    @DisplayName("selectOffer — обновляет статус, сохраняет оффер, сохраняет заявку и обновляет историю")
+    void selectOffer_updatesStatementAndSaves() {
         UUID statementId = UUID.randomUUID();
         Statement statement = statement(statementId);
         LoanOfferDto offer = offer(statementId);
@@ -41,44 +41,13 @@ public class OfferServiceTest {
 
         offerService.selectOffer(offer);
 
-        assertEquals(ApplicationStatus.APPROVED, statement.getStatus());
-    }
-
-    @Test
-    @DisplayName("selectOffer — выбранный оффер сохраняется в appliedOffer")
-    void selectOffer_setsAppliedOffer() {
-        UUID statementId = UUID.randomUUID();
-        Statement statement = statement(statementId);
-        LoanOfferDto offer = offer(statementId);
-        when(statementRepository.findById(statementId)).thenReturn(Optional.of(statement));
-
-        offerService.selectOffer(offer);
-
-        assertEquals(offer, statement.getAppliedOffer());
-    }
-
-    @Test
-    @DisplayName("selectOffer — заявка сохраняется в БД")
-    void selectOffer_savesStatement() {
-        UUID statementId = UUID.randomUUID();
-        Statement statement = statement(statementId);
-        when(statementRepository.findById(statementId)).thenReturn(Optional.of(statement));
-
-        offerService.selectOffer(offer(statementId));
+        assertAll(
+                () -> assertEquals(ApplicationStatus.APPROVED, statement.getStatus()),
+                () -> assertEquals(offer, statement.getAppliedOffer()),
+                () -> assertFalse(statement.getStatusHistory().isEmpty())
+        );
 
         verify(statementRepository).save(statement);
-    }
-
-    @Test
-    @DisplayName("selectOffer — история статусов обновляется")
-    void selectOffer_updatesStatusHistory() {
-        UUID statementId = UUID.randomUUID();
-        Statement statement = statement(statementId);
-        when(statementRepository.findById(statementId)).thenReturn(Optional.of(statement));
-
-        offerService.selectOffer(offer(statementId));
-
-        assertFalse(statement.getStatusHistory().isEmpty());
     }
 
     @Test

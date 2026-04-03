@@ -9,9 +9,9 @@ import com.remizov.deal.mapper.StatementMapper;
 import com.remizov.deal.repository.ClientRepository;
 import com.remizov.deal.repository.StatementRepository;
 import com.remizov.deal.service.StatementService;
+import com.remizov.deal.service.impl.client.CalculatorClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
@@ -23,11 +23,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class StatementServiceImpl implements StatementService {
 
+    private final CalculatorClient calculatorClient;
     private final ClientMapper clientMapper;
     private final StatementMapper statementMapper;
     private final ClientRepository clientRepository;
     private final StatementRepository statementRepository;
-    private final RestClient restClient;
 
     @Override
     public List<LoanOfferDto> statement(LoanStatementRequestDto request) {
@@ -43,11 +43,7 @@ public class StatementServiceImpl implements StatementService {
         log.info("Заявка создана и сохранена: statementId={}", statement.getId());
 
         log.info("Отправка запроса в калькулятор на /calculator/offers");
-        List<LoanOfferDto> offers = restClient.post()
-                .uri("/calculator/offers")
-                .body(request)
-                .retrieve()
-                .body(new ParameterizedTypeReference<>() {});
+        List<LoanOfferDto> offers = calculatorClient.getOffers(request);
 
         if (offers != null) {
             offers.forEach(offer -> offer.setStatementId(statement.getId()));

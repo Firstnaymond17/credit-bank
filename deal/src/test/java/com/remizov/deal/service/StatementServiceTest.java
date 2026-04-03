@@ -5,12 +5,13 @@ import com.remizov.deal.dto.LoanStatementRequestDto;
 import com.remizov.deal.entity.Client;
 import com.remizov.deal.entity.Passport;
 import com.remizov.deal.entity.Statement;
-import com.remizov.deal.enums.ApplicationStatus;
+import com.remizov.deal.entity.enums.ApplicationStatus;
 import com.remizov.deal.mapper.ClientMapper;
 import com.remizov.deal.mapper.StatementMapper;
 import com.remizov.deal.repository.ClientRepository;
 import com.remizov.deal.repository.StatementRepository;
 import com.remizov.deal.service.impl.StatementServiceImpl;
+import com.remizov.deal.service.impl.client.CalculatorClient;
 import com.remizov.deal.utils.RestClientMockUtils;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,6 +35,9 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class StatementServiceTest {
+
+    @Mock
+    private CalculatorClient calculatorClient;
 
     @Mock
     private ClientMapper clientMapper;
@@ -89,21 +93,39 @@ public class StatementServiceTest {
     }
 
     @Test
-    @DisplayName("statement — клиент и заявка сохраняются в БД")
-    void statement_savesClientAndStatement() {
-        mockRestClient(List.of(easyRandom.nextObject(LoanOfferDto.class)));
+    @DisplayName("statement — сохраняет клиента с корректными полями и заявку со статусом PREAPPROVAL")
+    void statement_savesClientAndStatementWithCorrectFields() {
+        LoanStatementRequestDto request = easyRandom.nextObject(LoanStatementRequestDto.class);
+        when(calculatorClient.getOffers(any(LoanStatementRequestDto.class))).thenReturn(List.of());
 
-        statementService.statement(easyRandom.nextObject(LoanStatementRequestDto.class));
+        statementService.statement(request);
 
-        verify(clientRepository).save(any(Client.class));
-        verify(statementRepository).save(any(Statement.class));
+        ArgumentCaptor<Client> clientCaptor = ArgumentCaptor.forClass(Client.class);
+        ArgumentCaptor<Statement> statementCaptor = ArgumentCaptor.forClass(Statement.class);
+
+        verify(clientRepository).save(clientCaptor.capture());
+        verify(statementRepository).save(statementCaptor.capture());
+
+        Client client = clientCaptor.getValue();
+        Statement statement = statementCaptor.getValue();
+
+        assertAll(
+                () -> assertEquals(request.getFirstname(), client.getFirstName()),
+                () -> assertEquals(request.getLastname(), client.getLastName()),
+                () -> assertEquals(request.getEmail(), client.getEmail()),
+                () -> assertEquals(request.getPassportSeries(), client.getPassport().getSeries()),
+                () -> assertEquals(request.getPassportNumber(), client.getPassport().getNumber()),
+                () -> assertEquals(ApplicationStatus.PREAPPROVAL, statement.getStatus()),
+                () -> assertNotNull(statement.getCreationDate()),
+                () -> assertTrue(statement.getStatusHistory().isEmpty())
+        );
     }
 
     @Test
     @DisplayName("statement — каждому офферу проставляется statementId")
     void statement_setsStatementIdToOffers() {
         UUID statementId = UUID.randomUUID();
-        mockRestClient(List.of(easyRandom.nextObject(LoanOfferDto.class)));
+        when(calculatorClient.getOffers(any(LoanStatementRequestDto.class))).thenReturn(List.of(easyRandom.nextObject(LoanOfferDto.class)));
         doAnswer(invocation -> {
             Statement s = invocation.getArgument(0);
             s.setId(statementId);
@@ -113,45 +135,6 @@ public class StatementServiceTest {
         List<LoanOfferDto> result = statementService.statement(easyRandom.nextObject(LoanStatementRequestDto.class));
 
         assertEquals(statementId, result.getFirst().getStatementId());
-    }
-
-    @Test
-    @DisplayName("statement — клиент создаётся с корректными полями")
-    void statement_clientHasCorrectFields() {
-        LoanStatementRequestDto request = easyRandom.nextObject(LoanStatementRequestDto.class);
-        mockRestClient(List.of());
-
-        statementService.statement(request);
-
-        ArgumentCaptor<Client> captor = ArgumentCaptor.forClass(Client.class);
-        verify(clientRepository).save(captor.capture());
-        Client client = captor.getValue();
-
-        assertAll(
-                () -> assertEquals(request.getFirstname(), client.getFirstName()),
-                () -> assertEquals(request.getLastname(), client.getLastName()),
-                () -> assertEquals(request.getEmail(), client.getEmail()),
-                () -> assertEquals(request.getPassportSeries(), client.getPassport().getSeries()),
-                () -> assertEquals(request.getPassportNumber(), client.getPassport().getNumber())
-        );
-    }
-
-    @Test
-    @DisplayName("statement — заявка создаётся со статусом PREAPPROVAL")
-    void statement_statementHasPreapprovalStatus() {
-        mockRestClient(List.of());
-
-        statementService.statement(easyRandom.nextObject(LoanStatementRequestDto.class));
-
-        ArgumentCaptor<Statement> captor = ArgumentCaptor.forClass(Statement.class);
-        verify(statementRepository).save(captor.capture());
-        Statement statement = captor.getValue();
-
-        assertAll(
-                () -> assertEquals(ApplicationStatus.PREAPPROVAL, statement.getStatus()),
-                () -> assertNotNull(statement.getCreationDate()),
-                () -> assertTrue(statement.getStatusHistory().isEmpty())
-        );
     }
 
     private void mockRestClient(List<LoanOfferDto> response) {

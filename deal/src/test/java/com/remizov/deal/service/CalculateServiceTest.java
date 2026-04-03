@@ -3,13 +3,14 @@ package com.remizov.deal.service;
 import com.remizov.deal.dto.*;
 import com.remizov.deal.entity.Credit;
 import com.remizov.deal.entity.Statement;
-import com.remizov.deal.enums.ApplicationStatus;
-import com.remizov.deal.enums.CreditStatus;
+import com.remizov.deal.entity.enums.ApplicationStatus;
+import com.remizov.deal.entity.enums.CreditStatus;
 import com.remizov.deal.mapper.CreditMapper;
 import com.remizov.deal.mapper.ScoringDataMapper;
 import com.remizov.deal.repository.CreditRepository;
 import com.remizov.deal.repository.StatementRepository;
 import com.remizov.deal.service.impl.CalculateServiceImpl;
+import com.remizov.deal.service.impl.client.CalculatorClient;
 import com.remizov.deal.utils.JsonTestDataUtils;
 import com.remizov.deal.utils.RestClientMockUtils;
 import com.remizov.deal.utils.TestDataUtils;
@@ -29,11 +30,13 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class CalculateServiceTest {
+
+    @Mock
+    private CalculatorClient calculatorClient;
 
     @Mock
     private CreditMapper creditMapper;
@@ -66,9 +69,7 @@ public class CalculateServiceTest {
     private CreditDto creditDto;
 
     @BeforeEach
-    void setUp() throws Exception {
-        request = JsonTestDataUtils.read("test-data/finish-registration-request.json", FinishRegistrationRequestDto.class);
-        creditDto = JsonTestDataUtils.read("test-data/credit-dto.json", CreditDto.class);
+    void setUp() {
 
         lenient().when(scoringDataMapper.toScoringData(any(), any(), any()))
                 .thenReturn(new ScoringDataDto());
@@ -86,10 +87,13 @@ public class CalculateServiceTest {
 
     @Test
     @DisplayName("calculate — сохраняет кредит, заявку и обновляет статус")
-    void calculate_savesAll() {
+    void calculate_savesAll() throws Exception {
         UUID statementId = UUID.randomUUID();
         Statement statement = statement(statementId);
-        mockRestClient(creditDto);
+        FinishRegistrationRequestDto request = loadFinishRegistrationRequest();
+        CreditDto creditDto = loadCreditDto();
+
+        when(calculatorClient.calculateCredit(any(ScoringDataDto.class))).thenReturn(creditDto);
         when(statementRepository.findById(statementId)).thenReturn(Optional.of(statement));
 
         calculateService.calculate(statementId.toString(), request);
@@ -101,9 +105,12 @@ public class CalculateServiceTest {
 
     @Test
     @DisplayName("calculate — кредит создаётся с правильными полями")
-    void calculate_creditHasCorrectFields() {
+    void calculate_creditHasCorrectFields() throws Exception {
         UUID statementId = UUID.randomUUID();
-        mockRestClient(creditDto);
+        FinishRegistrationRequestDto request = loadFinishRegistrationRequest();
+        CreditDto creditDto = loadCreditDto();
+
+        when(calculatorClient.calculateCredit(any(ScoringDataDto.class))).thenReturn(creditDto);
         when(statementRepository.findById(statementId)).thenReturn(Optional.of(statement(statementId)));
 
         calculateService.calculate(statementId.toString(), request);
@@ -136,17 +143,15 @@ public class CalculateServiceTest {
     @DisplayName("calculate — выбрасывает исключение если калькулятор вернул null")
     void calculate_throwsExceptionWhenCalculatorReturnsNull() {
         UUID statementId = UUID.randomUUID();
-        when(restClient.post()).thenReturn(requestBodyUriSpec);
-        when(requestBodyUriSpec.uri(anyString())).thenReturn(requestBodySpec);
-        when(requestBodySpec.body(any(Object.class))).thenReturn(requestBodySpec);
-        when(requestBodySpec.retrieve()).thenReturn(responseSpec);
-        when(responseSpec.body(CreditDto.class)).thenReturn(null);
+
+        when(calculatorClient.calculateCredit(any(ScoringDataDto.class))).thenReturn(null);
         when(statementRepository.findById(statementId)).thenReturn(Optional.of(statement(statementId)));
 
         RuntimeException exception = assertThrows(RuntimeException.class,
                 () -> calculateService.calculate(statementId.toString(), request));
 
         assertEquals("Калькулятор не вернул данные по кредиту", exception.getMessage());
+        verify(calculatorClient).calculateCredit(any(ScoringDataDto.class));
     }
 
     private void mockRestClient(CreditDto response) {
@@ -155,5 +160,13 @@ public class CalculateServiceTest {
 
     private static Statement statement(UUID id) {
         return TestDataUtils.createStatement(id);
+    }
+
+    private FinishRegistrationRequestDto loadFinishRegistrationRequest() throws Exception {
+        return JsonTestDataUtils.read("test-data/finish-registration-request.json", FinishRegistrationRequestDto.class);
+    }
+
+    private CreditDto loadCreditDto() throws Exception {
+        return JsonTestDataUtils.read("test-data/credit-dto.json", CreditDto.class);
     }
 }

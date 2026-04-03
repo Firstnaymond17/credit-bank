@@ -1,7 +1,7 @@
 package com.remizov.deal.dto;
 
-import com.remizov.deal.enums.Gender;
-import com.remizov.deal.enums.MaritalStatus;
+import com.remizov.deal.entity.enums.Gender;
+import com.remizov.deal.entity.enums.MaritalStatus;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
