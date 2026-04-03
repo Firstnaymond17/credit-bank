@@ -1,6 +1,7 @@
 package com.remizov.deal.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.remizov.deal.client.CalculatorClient;
 import com.remizov.deal.dto.*;
 import com.remizov.deal.entity.Client;
 import com.remizov.deal.entity.Credit;
@@ -11,12 +12,10 @@ import com.remizov.deal.mapper.ScoringDataMapper;
 import com.remizov.deal.repository.CreditRepository;
 import com.remizov.deal.repository.StatementRepository;
 import com.remizov.deal.service.CalculateService;
-import com.remizov.deal.service.impl.client.CalculatorClient;
 import com.remizov.deal.utils.StatementUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClient;
 
 import java.util.UUID;
 

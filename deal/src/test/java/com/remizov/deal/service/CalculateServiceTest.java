@@ -1,5 +1,6 @@
 package com.remizov.deal.service;
 
+import com.remizov.deal.client.CalculatorClient;
 import com.remizov.deal.dto.*;
 import com.remizov.deal.entity.Credit;
 import com.remizov.deal.entity.Statement;
@@ -10,9 +11,8 @@ import com.remizov.deal.mapper.ScoringDataMapper;
 import com.remizov.deal.repository.CreditRepository;
 import com.remizov.deal.repository.StatementRepository;
 import com.remizov.deal.service.impl.CalculateServiceImpl;
-import com.remizov.deal.service.impl.client.CalculatorClient;
+
 import com.remizov.deal.utils.JsonTestDataUtils;
-import com.remizov.deal.utils.RestClientMockUtils;
 import com.remizov.deal.utils.TestDataUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -22,7 +22,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.client.RestClient;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -50,17 +49,6 @@ public class CalculateServiceTest {
     @Mock
     private CreditRepository creditRepository;
 
-    @Mock
-    private RestClient restClient;
-
-    @Mock
-    private RestClient.RequestBodyUriSpec requestBodyUriSpec;
-
-    @Mock
-    private RestClient.RequestBodySpec requestBodySpec;
-
-    @Mock
-    private RestClient.ResponseSpec responseSpec;
 
     @InjectMocks
     private CalculateServiceImpl calculateService;
@@ -152,10 +140,6 @@ public class CalculateServiceTest {
 
         assertEquals("Калькулятор не вернул данные по кредиту", exception.getMessage());
         verify(calculatorClient).calculateCredit(any(ScoringDataDto.class));
-    }
-
-    private void mockRestClient(CreditDto response) {
-        RestClientMockUtils.mockRestClient(restClient, requestBodyUriSpec, requestBodySpec, responseSpec, creditDto);
     }
 
     private static Statement statement(UUID id) {

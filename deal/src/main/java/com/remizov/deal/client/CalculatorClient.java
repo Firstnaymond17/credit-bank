@@ -1,4 +1,4 @@
-package com.remizov.deal.service.impl.client;
+package com.remizov.deal.client;
 
 import com.remizov.deal.dto.CreditDto;
 import com.remizov.deal.dto.LoanOfferDto;

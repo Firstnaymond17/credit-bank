@@ -1,5 +1,6 @@
 package com.remizov.deal.service.impl;
 
+import com.remizov.deal.client.CalculatorClient;
 import com.remizov.deal.dto.LoanOfferDto;
 import com.remizov.deal.dto.LoanStatementRequestDto;
 import com.remizov.deal.entity.Client;
@@ -9,11 +10,9 @@ import com.remizov.deal.mapper.StatementMapper;
 import com.remizov.deal.repository.ClientRepository;
 import com.remizov.deal.repository.StatementRepository;
 import com.remizov.deal.service.StatementService;
-import com.remizov.deal.service.impl.client.CalculatorClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClient;
 
 
 import java.util.List;

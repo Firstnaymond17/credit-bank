@@ -1,5 +1,6 @@
 package com.remizov.deal.service;
 
+import com.remizov.deal.client.CalculatorClient;
 import com.remizov.deal.dto.LoanOfferDto;
 import com.remizov.deal.dto.LoanStatementRequestDto;
 import com.remizov.deal.entity.Client;
@@ -11,8 +12,7 @@ import com.remizov.deal.mapper.StatementMapper;
 import com.remizov.deal.repository.ClientRepository;
 import com.remizov.deal.repository.StatementRepository;
 import com.remizov.deal.service.impl.StatementServiceImpl;
-import com.remizov.deal.service.impl.client.CalculatorClient;
-import com.remizov.deal.utils.RestClientMockUtils;
+
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -22,7 +22,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.client.RestClient;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -50,18 +49,6 @@ public class StatementServiceTest {
 
     @Mock
     private StatementRepository statementRepository;
-
-    @Mock
-    private RestClient restClient;
-
-    @Mock
-    private RestClient.RequestBodyUriSpec requestBodyUriSpec;
-
-    @Mock
-    private RestClient.RequestBodySpec requestBodySpec;
-
-    @Mock
-    private RestClient.ResponseSpec responseSpec;
 
     @InjectMocks
     private StatementServiceImpl statementService;
@@ -137,7 +124,4 @@ public class StatementServiceTest {
         assertEquals(statementId, result.getFirst().getStatementId());
     }
 
-    private void mockRestClient(List<LoanOfferDto> response) {
-        RestClientMockUtils.mockRestClient(restClient, requestBodyUriSpec, requestBodySpec, responseSpec, response);
-    }
 }
