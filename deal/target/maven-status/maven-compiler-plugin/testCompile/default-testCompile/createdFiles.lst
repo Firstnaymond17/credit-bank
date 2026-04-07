@@ -1,0 +1,8 @@
+com\remizov\deal\utils\RestClientMockUtils$1.class
+com\remizov\deal\service\OfferServiceTest.class
+com\remizov\deal\utils\TestDataUtils.class
+com\remizov\deal\utils\JsonTestDataUtils.class
+com\remizov\deal\utils\RestClientMockUtils.class
+com\remizov\deal\service\CalculateServiceTest.class
+com\remizov\deal\controller\DealControllerTest.class
+com\remizov\deal\service\StatementServiceTest.class

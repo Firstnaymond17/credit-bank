@@ -141,7 +141,7 @@ class CalculatorControllerTest {
     @DisplayName("POST /calculator/offers — серия паспорта не 4 цифры → 400")
     void createOffers_invalidPassportSeries_returns400() throws Exception {
         LoanStatementRequestDto request = validLoanStatementRequest();
-        request.setPassportSeries("12"); // должно быть 4 цифры
+        request.setPassportSeries("12");
 
         mockMvc.perform(post("/calculator/offers")
                         .contentType(MediaType.APPLICATION_JSON)
