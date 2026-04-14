@@ -37,7 +37,7 @@ public class OfferServiceTest {
         UUID statementId = UUID.randomUUID();
         Statement statement = statement(statementId);
         LoanOfferDto offer = offer(statementId);
-        when(statementRepository.findById(statementId)).thenReturn(Optional.of(statement));
+        when(statementRepository.findByIdWithLock(statementId)).thenReturn(Optional.of(statement));
 
         offerService.selectOffer(offer);
 
@@ -54,7 +54,7 @@ public class OfferServiceTest {
     @DisplayName("selectOffer — выбрасывает исключение если заявка не найдена")
     void selectOffer_throwsExceptionWhenStatementNotFound() {
         UUID statementId = UUID.randomUUID();
-        when(statementRepository.findById(statementId)).thenReturn(Optional.empty());
+        when(statementRepository.findByIdWithLock(statementId)).thenReturn(Optional.empty());
 
         RuntimeException exception = assertThrows(RuntimeException.class,
                 () -> offerService.selectOffer(offer(statementId)));

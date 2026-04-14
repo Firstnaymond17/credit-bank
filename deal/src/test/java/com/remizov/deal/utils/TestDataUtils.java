@@ -39,4 +39,42 @@ public class TestDataUtils {
                 .build());
         return statement;
     }
+
+    public static Statement createStatementWithoutId() {
+        Passport passport = new Passport();
+        passport.setSeries("1234");
+        passport.setNumber("123456");
+
+        Client client = new Client();
+        client.setFirstName("Ivan");
+        client.setLastName("Ivanov");
+        client.setBirthDate(LocalDate.of(1990, 1, 1));
+        client.setPassport(passport);
+
+        Statement statement = new Statement();
+        statement.setClient(client);
+        statement.setStatusHistory(new ArrayList<>());
+        statement.setAppliedOffer(LoanOfferDto.builder()
+                .requestedAmount(BigDecimal.valueOf(100000))
+                .term(12)
+                .rate(BigDecimal.valueOf(21))
+                .isInsuranceEnabled(false)
+                .isSalaryClient(false)
+                .build());
+        return statement;
+    }
+
+    public static LoanOfferDto createOffer(UUID statementId) {
+        return LoanOfferDto.builder()
+                .statementId(statementId)
+                .rate(BigDecimal.valueOf(10))
+                .totalAmount(BigDecimal.valueOf(100000))
+                .requestedAmount(BigDecimal.valueOf(100000))
+                .term(12)
+                .monthlyPayment(BigDecimal.valueOf(9000))
+                .isInsuranceEnabled(false)
+                .isSalaryClient(false)
+                .build();
+    }
+
 }
