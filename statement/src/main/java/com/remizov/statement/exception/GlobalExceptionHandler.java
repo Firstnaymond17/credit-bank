@@ -1,20 +1,15 @@
-package com.remizov.calculator.exception;
+package com.remizov.statement.exception;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.bind.MethodArgumentNotValidException;
+
 import java.util.HashMap;
 import java.util.Map;
 
-
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
-    @ExceptionHandler(ScoringException.class)
-    public ResponseEntity<Map<String, String>> handleScoringException(ScoringException e) {
-        return ResponseEntity.status(422).body(Map.of("error", e.getMessage()));
-    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidationErrors(MethodArgumentNotValidException ex) {
@@ -23,5 +18,4 @@ public class GlobalExceptionHandler {
                 .forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
         return ResponseEntity.badRequest().body(errors);
     }
-
 }

@@ -6,6 +6,7 @@ import com.remizov.deal.entity.enums.ApplicationStatus;
 import com.remizov.deal.repository.StatementRepository;
 import com.remizov.deal.service.OfferService;
 import com.remizov.deal.utils.StatementUtils;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,11 +19,12 @@ public class OfferServiceImpl implements OfferService {
     private final StatementRepository statementRepository;
 
     @Override
+    @Transactional
     public void selectOffer(LoanOfferDto request) {
         log.info("Получен запрос на выбор оффера: statementId={}, rate={}, isInsuranceEnabled={}",
                 request.getStatementId(), request.getRate(), request.getIsInsuranceEnabled());
 
-        Statement statement = statementRepository.findById(request.getStatementId())
+        Statement statement = statementRepository.findByIdWithLock(request.getStatementId())
                 .orElseThrow(() -> new RuntimeException("Заявка не найдена " + request.getStatementId()));
         log.info("Заявка найдена: statementId={}", statement.getId());
 
