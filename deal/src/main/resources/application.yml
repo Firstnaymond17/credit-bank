@@ -8,7 +8,8 @@ spring:
       ddl-auto: validate
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.xml
-
+  kafka:
+    bootstrap-servers: localhost:9092
 
 server:
   port: 8081

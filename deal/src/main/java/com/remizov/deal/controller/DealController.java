@@ -4,6 +4,7 @@ import com.remizov.deal.dto.FinishRegistrationRequestDto;
 import com.remizov.deal.dto.LoanOfferDto;
 import com.remizov.deal.dto.LoanStatementRequestDto;
 import com.remizov.deal.service.CalculateService;
+import com.remizov.deal.service.DocumentService;
 import com.remizov.deal.service.OfferService;
 import com.remizov.deal.service.StatementService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,6 +28,7 @@ public class DealController {
     private final StatementService statementService;
     private final OfferService offerService;
     private final CalculateService calculateService;
+    private final DocumentService documentService;
 
     @Operation(
             summary = "Расчёт возможных условий кредита",
@@ -59,4 +61,23 @@ public class DealController {
         calculateService.calculate(statementId, request);
         return ResponseEntity.ok().build();
     }
+
+    @Operation(summary = "Запрос на отправку документов")
+    @PostMapping("/document/{statementId}/send")
+    public void sendDocuments(@PathVariable String statementId) {
+        documentService.sendDocuments(statementId);
+    }
+
+    @Operation(summary = "Запрос на подписание документов")
+    @PostMapping("/document/{statementId}/sign")
+    public void signDocuments(@PathVariable String statementId) {
+        documentService.signDocuments(statementId);
+    }
+
+    @Operation(summary = "Подписание документов по коду")
+    @PostMapping("/document/{statementId}/code")
+    public void codeDocuments(@PathVariable String statementId) {
+        documentService.codeDocuments(statementId);
+    }
+
 }
