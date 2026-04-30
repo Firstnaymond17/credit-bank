@@ -5,9 +5,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.remizov.deal.dto.FinishRegistrationRequestDto;
 import com.remizov.deal.dto.LoanOfferDto;
 import com.remizov.deal.dto.LoanStatementRequestDto;
-import com.remizov.deal.service.CalculateService;
-import com.remizov.deal.service.OfferService;
-import com.remizov.deal.service.StatementService;
+import com.remizov.deal.service.*;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -35,7 +33,13 @@ class DealControllerTest {
     private MockMvc mockMvc;
 
     @MockitoBean
+    private KafkaProducerService kafkaProducerService;
+
+    @MockitoBean
     private StatementService statementService;
+
+    @MockitoBean
+    private DocumentService documentService;
 
     @MockitoBean
     private OfferService offerService;

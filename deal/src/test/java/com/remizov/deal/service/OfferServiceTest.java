@@ -1,6 +1,7 @@
 package com.remizov.deal.service;
 
 import com.remizov.deal.dto.LoanOfferDto;
+import com.remizov.deal.entity.Client;
 import com.remizov.deal.entity.Statement;
 import com.remizov.deal.entity.enums.ApplicationStatus;
 import com.remizov.deal.repository.StatementRepository;
@@ -25,6 +26,9 @@ public class OfferServiceTest {
 
     @Mock
     private StatementRepository statementRepository;
+
+    @Mock
+    private KafkaProducerService kafkaProducerService;
 
     @InjectMocks
     private OfferServiceImpl offerService;
@@ -63,8 +67,12 @@ public class OfferServiceTest {
     }
 
     private static Statement statement(UUID id) {
+        Client client = new Client();
+        client.setEmail("test@test.com");
+
         Statement statement = new Statement();
         statement.setId(id);
+        statement.setClient(client);
         statement.setStatusHistory(new ArrayList<>());
         return statement;
     }
