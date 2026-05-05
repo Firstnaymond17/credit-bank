@@ -28,15 +28,6 @@
         </processorPath>
         <module name="calculator" />
       </profile>
-      <profile name="Annotation profile for dossier" enabled="true">
-        <sourceOutputDir name="target/generated-sources/annotations" />
-        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
-        <outputRelativeToContentRoot value="true" />
-        <processorPath useClasspath="false">
-          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.42/lombok-1.18.42.jar" />
-        </processorPath>
-        <module name="dossier" />
-      </profile>
       <profile name="Annotation profile for parent" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
@@ -48,6 +39,16 @@
         </processorPath>
         <module name="deal" />
       </profile>
+      <profile name="Annotation profile for gateway" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.42/lombok-1.18.42.jar" />
+        </processorPath>
+        <module name="dossier" />
+        <module name="gateway" />
+      </profile>
     </annotationProcessing>
   </component>
   <component name="JavacSettings">
@@ -56,6 +57,7 @@
       <module name="credit-bank" options="-parameters" />
       <module name="deal" options="-parameters" />
       <module name="dossier" options="-parameters" />
+      <module name="gateway" options="-parameters" />
       <module name="parent" options="-parameters" />
       <module name="statement" options="-parameters" />
     </option>
