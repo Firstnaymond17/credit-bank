@@ -5,7 +5,6 @@ import com.remizov.gateway.client.StatementClient;
 import com.remizov.gateway.dto.FinishRegistrationRequestDto;
 import com.remizov.gateway.dto.LoanOfferDto;
 import com.remizov.gateway.dto.LoanStatementRequestDto;
-import com.remizov.gateway.dto.StatementDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -67,17 +66,4 @@ public class GatewayController {
         dealClient.codeDocuments(statementId);
     }
 
-    @Operation(summary = "Получить заявку по id")
-    @GetMapping("/admin/statement/{statementId}")
-    public StatementDto getStatement(@PathVariable String statementId) {
-        log.info("GET /gateway/admin/statement/{}", statementId);
-        return dealClient.getStatement(statementId);
-    }
-
-    @Operation(summary = "Получить все заявки")
-    @GetMapping("/admin/statement")
-    public List<StatementDto> getAllStatements() {
-        log.info("GET /gateway/admin/statement");
-        return dealClient.getAllStatements();
-    }
 }
