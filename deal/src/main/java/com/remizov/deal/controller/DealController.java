@@ -3,6 +3,8 @@ package com.remizov.deal.controller;
 import com.remizov.deal.dto.FinishRegistrationRequestDto;
 import com.remizov.deal.dto.LoanOfferDto;
 import com.remizov.deal.dto.LoanStatementRequestDto;
+import com.remizov.deal.entity.Statement;
+import com.remizov.deal.repository.StatementRepository;
 import com.remizov.deal.service.CalculateService;
 import com.remizov.deal.service.DocumentService;
 import com.remizov.deal.service.OfferService;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @RestController
@@ -29,6 +32,7 @@ public class DealController {
     private final OfferService offerService;
     private final CalculateService calculateService;
     private final DocumentService documentService;
+    private final StatementRepository statementRepository;
 
     @Operation(
             summary = "Расчёт возможных условий кредита",
@@ -78,6 +82,21 @@ public class DealController {
     @PostMapping("/document/{statementId}/code")
     public void codeDocuments(@PathVariable String statementId) {
         documentService.codeDocuments(statementId);
+    }
+
+    @Operation(summary = "Получить заявку по id")
+    @GetMapping("/admin/statement/{statementId}")
+    public Statement getStatement(@PathVariable UUID statementId) {
+        log.info("GET /deal/admin/statement/{}", statementId);
+        return statementRepository.findById(statementId)
+                .orElseThrow(() -> new RuntimeException("Заявка не найдена: " + statementId));
+    }
+
+    @Operation(summary = "Получить все заявки")
+    @GetMapping("/admin/statement")
+    public List<Statement> getAllStatements() {
+        log.info("GET /deal/admin/statement");
+        return statementRepository.findAll();
     }
 
 }
