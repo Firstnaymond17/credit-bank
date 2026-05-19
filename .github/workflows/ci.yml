@@ -32,6 +32,6 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: mvn sonar:sonar
           -Dsonar.projectKey=Firstnaymond17_credit-bank
-          -Dsonar.organization=Firstnaymond17
+          -Dsonar.organization=firstnaymond17
           -Dsonar.host.url=https://sonarcloud.io
           -Dsonar.token=${{ secrets.SONAR_TOKEN }}
