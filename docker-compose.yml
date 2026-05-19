@@ -20,7 +20,7 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
   mailhog:
@@ -29,3 +29,68 @@ services:
     ports:
       - "1025:1025"
       - "8025:8025"
+
+  postgres:
+    image: postgres:16
+    container_name: credit_postgres
+    environment:
+      POSTGRES_DB: credit_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+
+  calculator:
+    build: ./calculator
+    container_name: calculator
+    ports:
+      - "8080:8080"
+
+  deal:
+    build: ./deal
+    container_name: deal
+    ports:
+      - "8081:8081"
+    depends_on:
+      - postgres
+      - kafka
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/credit_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      CALCULATOR_URL: http://calculator:8080
+
+  statement:
+    build: ./statement
+    container_name: statement
+    ports:
+      - "8082:8082"
+    depends_on:
+      - deal
+    environment:
+      DEAL_URL: http://deal:8081
+
+  dossier:
+    build: ./dossier
+    container_name: dossier
+    ports:
+      - "8083:8083"
+    depends_on:
+      - kafka
+      - mailhog
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_MAIL_HOST: mailhog
+
+  gateway:
+    build: ./gateway
+    container_name: gateway
+    ports:
+      - "8084:8084"
+    depends_on:
+      - statement
+      - deal
+    environment:
+      STATEMENT_URL: http://statement:8082
+      DEAL_URL: http://deal:8081
