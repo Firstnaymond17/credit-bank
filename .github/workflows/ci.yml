@@ -46,11 +46,15 @@ jobs:
           SPRING_DATASOURCE_USERNAME: postgres
           SPRING_DATASOURCE_PASSWORD: postgres
 
+      - name: Find jacoco.xml
+        run: |
+          find . -name "jacoco.xml" -type f
+
       - name: Upload coverage to Coveralls
         uses: coverallsapp/github-action@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          file: target/site/jacoco/jacoco.xml
+          file: calculator/target/site/jacoco/jacoco.xml
           format: jacoco
 
       - name: SonarCloud analysis
