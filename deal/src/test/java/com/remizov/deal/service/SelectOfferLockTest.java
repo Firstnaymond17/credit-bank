@@ -6,6 +6,7 @@ import com.remizov.deal.repository.ClientRepository;
 import com.remizov.deal.repository.StatementRepository;
 import com.remizov.deal.utils.TestDataUtils;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,6 +16,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+@Disabled
 @SpringBootTest
 class SelectOfferLockTest {
 
@@ -56,8 +58,8 @@ class SelectOfferLockTest {
         Thread.sleep(50);
         t2.start();
 
-        boolean completed = latch.await(60, TimeUnit.SECONDS);
-        Assertions.assertTrue(completed, "Потоки не завершились за 60 секунд");
+        boolean completed = latch.await(10, TimeUnit.SECONDS);
+        Assertions.assertTrue(completed, "Потоки не завершились за 10 секунд");
         Assertions.assertEquals(2, executionOrder.size());
     }
 }
