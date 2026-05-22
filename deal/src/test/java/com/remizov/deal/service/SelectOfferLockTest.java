@@ -6,7 +6,6 @@ import com.remizov.deal.repository.ClientRepository;
 import com.remizov.deal.repository.StatementRepository;
 import com.remizov.deal.utils.TestDataUtils;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,7 +15,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-@Disabled
 @SpringBootTest
 class SelectOfferLockTest {
 
