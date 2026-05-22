@@ -56,11 +56,11 @@
                 <artifactId>sonar-maven-plugin</artifactId>
                 <version>3.11.0.3922</version>
             </plugin>
-<!--            <plugin>-->
-<!--                <groupId>org.eluder.coveralls</groupId>-->
-<!--                <artifactId>coveralls-maven-plugin</artifactId>-->
-<!--                <version>4.3.0</version>-->
-<!--            </plugin>-->
+            <plugin>
+                <groupId>org.eluder.coveralls</groupId>
+                <artifactId>coveralls-maven-plugin</artifactId>
+                <version>4.3.0</version>
+            </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
