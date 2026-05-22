@@ -47,9 +47,7 @@ jobs:
           SPRING_DATASOURCE_PASSWORD: postgres
 
       - name: Upload coverage to Coveralls
-        run: mvn coveralls:report
-        env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+        run: mvn coveralls:report -DrepoToken=${{ secrets.COVERALLS_REPO_TOKEN }}
 
       - name: SonarCloud analysis
         env:
