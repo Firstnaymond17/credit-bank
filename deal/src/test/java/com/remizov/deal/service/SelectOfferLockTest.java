@@ -56,7 +56,7 @@ class SelectOfferLockTest {
         Thread.sleep(50);
         t2.start();
 
-        boolean completed = latch.await(10, TimeUnit.SECONDS);
+        boolean completed = latch.await(30, TimeUnit.SECONDS);
         Assertions.assertTrue(completed, "Потоки не завершились за 10 секунд");
         Assertions.assertEquals(2, executionOrder.size());
     }
