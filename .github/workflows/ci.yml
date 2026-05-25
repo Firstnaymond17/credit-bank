@@ -39,9 +39,11 @@ jobs:
         image: confluentinc/cp-kafka:7.5.0
         env:
           KAFKA_BROKER_ID: 1
-          KAFKA_ZOOKEEPER_CONNECT: localhost:2181
+          KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
           KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
           KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+          KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+          KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
         ports:
           - 9092:9092
         options: >-
